@@ -1,0 +1,18 @@
+{
+  "name": "xadrezarrumado",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 0.0.0.0",
+    "build": "vite build",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.57.0",
+    "chess.js": "^1.4.0"
+  },
+  "devDependencies": {
+    "vite": "^6.3.5"
+  }
+}

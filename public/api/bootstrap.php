@@ -3,16 +3,20 @@
 /**
  * Arquivo carregado por TODOS os endpoints em api/.
  * Responsável por:
- *  - iniciar a sessão PHP (é aqui que guardamos a partida em andamento)
+ *  - iniciar a sessão PHP (partida em andamento e autenticação)
  *  - carregar as classes do jogo
  *  - fornecer funções auxiliares para salvar/recuperar o Game da sessão
  *
- * Por que sessão e não banco por enquanto? Porque sessão é mais simples
- * pra desenvolver e testar localmente. Mais pra frente, quando entrarmos
- * em login/ranking, vamos migrar o histórico definitivo pro banco —
- * mas o estado "vivo" da partida pode continuar na sessão.
+ * O estado temporário da partida fica na sessão; as contas ficam no banco.
  */
 
+ini_set('session.use_strict_mode', '1');
+ini_set('session.use_only_cookies', '1');
+session_set_cookie_params([
+    'httponly' => true,
+    'secure' => isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off',
+    'samesite' => 'Lax',
+]);
 session_start();
 
 require_once __DIR__ . '/../../src/Piece.php';

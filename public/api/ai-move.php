@@ -43,7 +43,6 @@ if ($move === null) {
 [$toRow, $toCol] = $move['to'];
 
 $result = $game->makeMove($fromRow, $fromCol, $toRow, $toCol);
-$result['move'] = ['from' => $move['from'], 'to' => $move['to']]; // front precisa saber o que a IA jogou, pra animar
 
 saveGameToSession($game);
 

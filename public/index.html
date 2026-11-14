@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Xadrez online</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <main class="game-container">
+        <h1>Xadrez</h1>
+
+        <section class="account-bar" aria-label="Conta do usuário">
+            <span id="account-user-label">Conectando...</span>
+            <a id="account-link" href="auth.html" hidden>Entrar ou criar conta</a>
+            <button id="logout-btn" type="button" hidden>Sair</button>
+        </section>
+
+        <section class="online-panel" aria-label="Jogar online com um amigo">
+            <h2>Jogar com um amigo</h2>
+            <p>Crie uma sala e compartilhe o convite, ou entre usando o código recebido.</p>
+            <div class="online-actions">
+                <button id="create-room-btn" type="button">Criar sala online</button>
+                <form id="join-room-form">
+                    <label class="sr-only" for="room-code-input">Código da sala</label>
+                    <input id="room-code-input" name="code" type="text" inputmode="text"
+                        autocomplete="off" maxlength="6" placeholder="CÓDIGO" required>
+                    <button type="submit">Entrar na sala</button>
+                </form>
+            </div>
+            <div id="invite-panel" class="invite-panel" hidden>
+                <p id="online-status" role="status" aria-live="polite"></p>
+                <label for="invite-link">Link para seu amigo</label>
+                <div class="invite-link-row">
+                    <input id="invite-link" type="text" readonly>
+                    <button id="copy-invite-btn" type="button">Copiar</button>
+                </div>
+                <button id="resign-btn" type="button" class="secondary-button" hidden>Desistir</button>
+            </div>
+        </section>
+
+        <details class="local-game-panel">
+            <summary>Jogar neste dispositivo</summary>
+            <div class="controls">
+                <label>
+                    Modo:
+                    <select id="mode-select">
+                        <option value="player-vs-ai">Jogador vs. IA</option>
+                        <option value="ai-vs-ai">IA vs. IA</option>
+                    </select>
+                </label>
+                <label>
+                    Dificuldade da IA:
+                    <select id="difficulty-select">
+                        <option value="random">Aleatória</option>
+                        <option value="greedy">Gulosa (prioriza capturas)</option>
+                    </select>
+                </label>
+                <button id="new-game-btn" type="button">Nova partida local</button>
+            </div>
+        </details>
+
+        <div id="status" class="status" role="status" aria-live="polite">
+            Crie uma sala online ou comece uma partida local.
+        </div>
+        <div id="board" class="board"></div>
+    </main>
+
+    <dialog id="promotion-dialog" class="promotion-dialog">
+        <form method="dialog">
+            <h2>Escolha a peça da promoção</h2>
+            <div class="promotion-choices">
+                <button type="submit" value="q" aria-label="Promover a dama">♕</button>
+                <button type="submit" value="r" aria-label="Promover a torre">♖</button>
+                <button type="submit" value="b" aria-label="Promover a bispo">♗</button>
+                <button type="submit" value="n" aria-label="Promover a cavalo">♘</button>
+            </div>
+        </form>
+    </dialog>
+
+    <script type="module" src="js/ui.js"></script>
+</body>
+</html>

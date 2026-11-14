@@ -1,29 +1,26 @@
-/**
- * api.js — a única parte do front-end que fala com o PHP.
- * Nenhum outro arquivo JS deve usar fetch() diretamente; assim,
- * se um dia mudar a URL ou o formato da API, só mexe aqui.
- */
+import { requireSupabase } from './supabase.js';
 
-const API = {
-    async newGame(mode, difficulty) {
-        return API._post('api/new-game.php', { mode, difficulty });
-    },
+export async function callGameApi(action, data = {}) {
+    const supabase = requireSupabase();
+    const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+    if (sessionError) throw sessionError;
 
-    async move(fromRow, fromCol, toRow, toCol) {
-        return API._post('api/move.php', { fromRow, fromCol, toRow, toCol });
-    },
+    const token = sessionData.session?.access_token;
+    if (!token) throw new Error('Entre na sua conta para jogar online.');
 
-    async aiMove() {
-        return API._post('api/ai-move.php', {});
-    },
+    const response = await fetch('/api/games', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ action, ...data }),
+    });
 
-    async _post(url, body) {
-        const response = await fetch(url, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            credentials: 'same-origin', // garante que o cookie de sessão vai junto
-            body: JSON.stringify(body),
-        });
-        return response.json();
-    },
-};
+    const result = await response.json();
+    if (!response.ok || !result.success) {
+        throw new Error(result.error || 'Não foi possível acessar a partida.');
+    }
+
+    return result.game;
+}

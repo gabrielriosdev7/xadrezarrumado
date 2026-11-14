@@ -22,12 +22,22 @@ $body = getJsonBody();
 
 // Validação básica de entrada — nunca confie no que vem do navegador
 foreach (['fromRow', 'fromCol', 'toRow', 'toCol'] as $field) {
-    if (!isset($body[$field]) || !is_int($body[$field])) {
+    if (!isset($body[$field]) || !is_int($body[$field]) || $body[$field] < 0 || $body[$field] > 7) {
         jsonResponse(['success' => false, 'error' => "Campo '$field' ausente ou inválido."], 400);
     }
 }
 
-$result = $game->makeMove($body['fromRow'], $body['fromCol'], $body['toRow'], $body['toCol']);
+if (isset($body['promotion']) && !is_string($body['promotion'])) {
+    jsonResponse(['success' => false, 'error' => 'Campo promotion inválido.'], 400);
+}
+
+$result = $game->makeMove(
+    $body['fromRow'],
+    $body['fromCol'],
+    $body['toRow'],
+    $body['toCol'],
+    $body['promotion'] ?? 'Q'
+);
 
 // Mesmo em caso de erro (jogada ilegal), salvamos o Game de volta —
 // ele não mudou, mas isso mantém a sessão consistente.

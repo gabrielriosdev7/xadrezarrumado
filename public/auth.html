@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Entrar ou criar conta — Xadrez</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="auth-page">
+    <main class="auth-container">
+        <a class="auth-back-link" href="index.html">← Voltar para o xadrez</a>
+        <h1>Bem-vindo ao Xadrez</h1>
+        <p class="auth-intro">Entre na sua conta ou crie uma nova para jogar com seus amigos.</p>
+
+        <div class="auth-tabs" aria-label="Acesso à conta">
+            <button class="auth-tab" type="button" data-auth-view="login" aria-pressed="true">Entrar</button>
+            <button class="auth-tab" type="button" data-auth-view="register" aria-pressed="false">Criar conta</button>
+        </div>
+
+        <form id="login-form" class="auth-form">
+            <label>
+                E-mail
+                <input name="email" type="email" autocomplete="username" maxlength="254" required>
+            </label>
+            <label>
+                Senha
+                <input name="password" type="password" autocomplete="current-password" required>
+            </label>
+            <button type="submit">Entrar</button>
+        </form>
+
+        <form id="register-form" class="auth-form" hidden>
+            <label>
+                Nome
+                <input name="name" type="text" autocomplete="name" maxlength="100" required>
+            </label>
+            <label>
+                E-mail
+                <input name="email" type="email" autocomplete="email" maxlength="254" required>
+            </label>
+            <label>
+                Senha (mínimo de 8 caracteres)
+                <input name="password" type="password" autocomplete="new-password" minlength="8" maxlength="72" required>
+            </label>
+            <button type="submit">Criar conta</button>
+        </form>
+
+        <p id="auth-status" class="auth-status" role="status" aria-live="polite"></p>
+    </main>
+    <script type="module" src="js/auth.js"></script>
+</body>
+</html>

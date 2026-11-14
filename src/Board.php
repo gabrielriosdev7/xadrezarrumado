@@ -65,16 +65,58 @@ class Board
      * Move uma peça sem validar se é legal — validação é papel da
      * classe Rules. Board só executa e mantém o estado consistente.
      */
-    public function movePiece(int $fromRow, int $fromCol, int $toRow, int $toCol): ?Piece
+    public function movePiece(
+        int $fromRow,
+        int $fromCol,
+        int $toRow,
+        int $toCol,
+        string $promotion = 'Q'
+    ): ?Piece
     {
         $piece = $this->grid[$fromRow][$fromCol];
         $captured = $this->grid[$toRow][$toCol];
+        $capturedRow = $toRow;
+        $capturedCol = $toCol;
+        $rookMove = null;
+
+        if ($piece instanceof Pawn && $fromCol !== $toCol && $captured === null) {
+            $capturedRow = $fromRow;
+            $captured = $this->grid[$capturedRow][$toCol];
+            $this->grid[$capturedRow][$toCol] = null;
+        }
+
+        if ($piece instanceof King && abs($toCol - $fromCol) === 2) {
+            $rookFromCol = $toCol > $fromCol ? 7 : 0;
+            $rookToCol = $toCol > $fromCol ? $toCol - 1 : $toCol + 1;
+            $rook = $this->grid[$fromRow][$rookFromCol];
+            $this->grid[$fromRow][$rookToCol] = $rook;
+            $this->grid[$fromRow][$rookFromCol] = null;
+            $rook?->markAsMoved();
+            $rookMove = [
+                'from' => [$fromRow, $rookFromCol],
+                'to' => [$fromRow, $rookToCol],
+            ];
+        }
 
         $this->grid[$toRow][$toCol] = $piece;
         $this->grid[$fromRow][$fromCol] = null;
         $piece?->markAsMoved();
 
-        $this->lastMove = compact('fromRow', 'fromCol', 'toRow', 'toCol');
+        $promotedTo = null;
+        if ($piece instanceof Pawn && ($toRow === 0 || $toRow === 7)) {
+            $promotedTo = strtoupper($promotion);
+            $this->grid[$toRow][$toCol] = match ($promotedTo) {
+                'R' => new Rook($piece->getColor()),
+                'B' => new Bishop($piece->getColor()),
+                'N' => new Knight($piece->getColor()),
+                default => new Queen($piece->getColor()),
+            };
+            $this->grid[$toRow][$toCol]->markAsMoved();
+        }
+
+        $this->lastMove = compact('fromRow', 'fromCol', 'toRow', 'toCol')
+            + ['captureAt' => $captured === null ? null : [$capturedRow, $capturedCol]]
+            + ['promotion' => $promotedTo, 'rookMove' => $rookMove];
 
         return $captured; // devolve a peça capturada (ou null), útil pro histórico
     }
@@ -82,6 +124,51 @@ class Board
     public function getLastMove(): ?array
     {
         return $this->lastMove;
+    }
+
+    public function getCastlingRights(): array
+    {
+        $rights = [];
+        foreach (['white' => 7, 'black' => 0] as $color => $row) {
+            $king = $this->grid[$row][4];
+            $rights[$color] = [
+                'kingSide' => $king instanceof King
+                    && $king->getColor() === $color
+                    && !$king->hasMoved()
+                    && $this->grid[$row][7] instanceof Rook
+                    && $this->grid[$row][7]->getColor() === $color
+                    && !$this->grid[$row][7]->hasMoved(),
+                'queenSide' => $king instanceof King
+                    && $king->getColor() === $color
+                    && !$king->hasMoved()
+                    && $this->grid[$row][0] instanceof Rook
+                    && $this->grid[$row][0]->getColor() === $color
+                    && !$this->grid[$row][0]->hasMoved(),
+            ];
+        }
+        return $rights;
+    }
+
+    public function getEnPassantTarget(): ?array
+    {
+        if ($this->lastMove === null || abs($this->lastMove['toRow'] - $this->lastMove['fromRow']) !== 2) {
+            return null;
+        }
+
+        $pawn = $this->grid[$this->lastMove['toRow']][$this->lastMove['toCol']];
+        if (!($pawn instanceof Pawn)) {
+            return null;
+        }
+
+        $targetRow = intdiv($this->lastMove['fromRow'] + $this->lastMove['toRow'], 2);
+        foreach ([-1, 1] as $offset) {
+            $adjacent = $this->getPieceAt($this->lastMove['toRow'], $this->lastMove['toCol'] + $offset);
+            if ($adjacent instanceof Pawn && $adjacent->getColor() !== $pawn->getColor()) {
+                return [$targetRow, $this->lastMove['toCol']];
+            }
+        }
+
+        return null;
     }
 
     /**

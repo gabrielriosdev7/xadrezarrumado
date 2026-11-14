@@ -82,7 +82,8 @@ abstract class Piece
             return false;
         }
         $occupant = $board[$row][$col] ?? null;
-        return $occupant === null || $occupant->getColor() !== $this->color;
+        return $occupant === null
+            || (!($occupant instanceof King) && $occupant->getColor() !== $this->color);
     }
 
     /**
@@ -100,7 +101,7 @@ abstract class Piece
                 if ($occupant === null) {
                     $moves[] = [$r, $c];
                 } else {
-                    if ($occupant->getColor() !== $this->color) {
+                    if (!($occupant instanceof King) && $occupant->getColor() !== $this->color) {
                         $moves[] = [$r, $c]; // pode capturar, mas para aqui
                     }
                     break;
@@ -128,7 +129,7 @@ class Pawn extends Piece
 
             // Avanço duplo a partir da posição inicial
             $twoStep = $row + 2 * $direction;
-            if ($row === $startRow && !isset($board[$twoStep][$col])) {
+            if ($row === $startRow && !$this->hasMoved() && !isset($board[$twoStep][$col])) {
                 $moves[] = [$twoStep, $col];
             }
         }
@@ -137,7 +138,12 @@ class Pawn extends Piece
         foreach ([-1, 1] as $dCol) {
             $r = $row + $direction;
             $c = $col + $dCol;
-            if ($this->isOnBoard($r, $c) && isset($board[$r][$c]) && $board[$r][$c]->getColor() !== $this->color) {
+            if (
+                $this->isOnBoard($r, $c)
+                && isset($board[$r][$c])
+                && !($board[$r][$c] instanceof King)
+                && $board[$r][$c]->getColor() !== $this->color
+            ) {
                 $moves[] = [$r, $c];
             }
         }
